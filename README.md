@@ -1,8 +1,8 @@
 qs2
 ================
 
-[![R-CMD-check](https://github.com/traversc/qs2/workflows/R-CMD-check/badge.svg)](https://github.com/traversc/qs2/actions)
-[![CRAN-Status-Badge](http://www.r-pkg.org/badges/version/qs2)](https://cran.r-project.org/package=qs2)
+[![R-CMD-check](https://github.com/qsbase/qs2/workflows/R-CMD-check/badge.svg)](https://github.com/qsbase/qs2/actions)
+[![CRAN-Status-Badge](https://www.r-pkg.org/badges/version/qs2)](https://cran.r-project.org/package=qs2)
 [![CRAN-Downloads-Badge](https://cranlogs.r-pkg.org/badges/qs2)](https://cran.r-project.org/package=qs2)
 [![CRAN-Downloads-Total-Badge](https://cranlogs.r-pkg.org/badges/grand-total/qs2)](https://cran.r-project.org/package=qs2)
 
@@ -30,11 +30,17 @@ package. It is not compatible with the original `qs` format.
 install.packages("qs2")
 ```
 
-On Mac or Linux, you can enable multi-threading by compiling from
+On x64 Mac or Linux, you can enable multi-threading by compiling from
 source. It is enabled by default on Windows.
 
 ``` r
-remotes::install_cran("qs2", type = "source", configure.args = " --with-TBB --with-simd=AVX2")
+remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB --with-simd=AVX2")
+```
+
+On non-x64 systems (e.g. Mac ARM) remove the AVX2 flag.
+
+``` r
+remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB")
 ```
 
 Multi-threading in `qs2` uses the `Intel Thread Building Blocks`
@@ -131,3 +137,40 @@ A summary across 4 datasets is presented below.
 These datasets are openly licensed and represent a combination of
 numeric and text data across multiple domains. See
 `inst/analysis/datasets.R` on Github.
+
+# Usage in C/C++
+
+Serialization functions can be accessed in compiled code. Below is an
+example using Rcpp.
+
+``` cpp
+// [[Rcpp::depends(qs2)]]
+#include <Rcpp.h>
+#include "qs2_external.h"
+using namespace Rcpp;
+
+// [[Rcpp::export]]
+SEXP test_qs_serialize(SEXP x) {
+  size_t len = 0;
+  unsigned char * buffer = c_qs_serialize(x, &len, 10, true, 4); // object, buffer length, compress_level, shuffle, nthreads
+  SEXP y = c_qs_deserialize(buffer, len, false, 4);              // buffer, buffer length, validate_checksum, nthreads
+  c_qs_free(buffer);                                             // must manually free buffer
+  return y;
+}
+
+// [[Rcpp::export]]
+SEXP test_qd_serialize(SEXP x) {
+  size_t len = 0;
+  unsigned char * buffer = c_qd_serialize(x, &len, 10, true, 4); // object, buffer length, compress_level, shuffle, nthreads
+  SEXP y = c_qd_deserialize(buffer, len, false, false, 4);       // buffer, buffer length, use_alt_rep, validate_checksum, nthreads
+  c_qd_free(buffer);                                             // must manually free buffer
+  return y;
+}
+
+
+/*** R
+x <- runif(1e7)
+stopifnot(test_qs_serialize(x) == x)
+stopifnot(test_qd_serialize(x) == x)
+*/
+```

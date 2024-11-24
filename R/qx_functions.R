@@ -1,7 +1,7 @@
 
-shared_params_save <- function(warn_unsupported_types=FALSE) {
+shared_params_save <- function(file_output=TRUE, warn_unsupported_types=FALSE) {
   c('@param object The object to save.',
-    '@param file The file name/path.',
+    '@param file The file name/path.'[file_output],
     '@param compress_level The compression level used (default 3).',
     '',
     'The maximum and minimum possible values depends on the version of ZSTD library used.',
@@ -9,16 +9,16 @@ shared_params_save <- function(warn_unsupported_types=FALSE) {
     'of speed and compression.',
     '@param shuffle Whether to allow byte shuffling when compressing data (default: `TRUE`).',
     '@param warn_unsupported_types Whether to warn when saving an object with an unsupported type (default `TRUE`).'[warn_unsupported_types],
-    '@param nthreads The number of threads to use when compressing data (default: `1`).',
-    '@return No value is returned. The file is written to disk.')
-
+    '@param nthreads The number of threads to use when compressing data (default: `1`).'
+    )
 }
 
-shared_params_read <- function(use_alt_rep=FALSE) {
-  c('@param file The file name/path.',
-  '@param use_alt_rep Use ALTREP when reading in string data (default `FALSE`).'[use_alt_rep],
-  '@param validate_checksum Whether to validate the stored checksum in the file (default `FALSE`). This can be used to test for file corruption but has a performance penality.',
-  '@param nthreads The number of threads to use when reading data (default: `1`).')
+shared_params_read <- function(file_input=TRUE, use_alt_rep=FALSE) {
+  c('@param file The file name/path.'[file_input],
+   '@param input The raw vector to deserialize.'[!file_input],
+   '@param use_alt_rep Use ALTREP when reading in string data (default `FALSE`).'[use_alt_rep],
+   '@param validate_checksum Whether to validate the stored checksum in the file (default `FALSE`). This can be used to test for file corruption but has a performance penality.',
+   '@param nthreads The number of threads to use when reading data (default: `1`).')
 }
 
 #' qs_save
@@ -29,6 +29,7 @@ shared_params_read <- function(use_alt_rep=FALSE) {
 #' shuffle = TRUE, nthreads = 1L)
 #'
 #' @eval shared_params_save()
+#' @return No value is returned. The file is written to disk.
 #' @export
 #' @name qs_save
 #'
@@ -36,15 +37,31 @@ shared_params_read <- function(use_alt_rep=FALSE) {
 #' x <- data.frame(int = sample(1e3, replace=TRUE),
 #'         num = rnorm(1e3),
 #'         char = sample(state.name, 1e3, replace=TRUE),
-#'          stringsAsFactors = FALSE)
+#'         stringsAsFactors = FALSE)
 #' myfile <- tempfile()
 #' qs_save(x, myfile)
 #' x2 <- qs_read(myfile)
 #' identical(x, x2) # returns true
-#'
-#' # qs2 support multithreading
-#' qs_save(x, myfile, nthreads=1)
-#' x2 <- qs_read(myfile, nthreads=1)
+NULL
+
+#' qs_serialize
+#' 
+#' Serializes an object to a raw vector using the `qs2` format.
+#' 
+#' @usage qs_serialize(object, compress_level = 3L, shuffle = TRUE, nthreads = 1L)
+#' 
+#' @eval shared_params_save(file_output=FALSE)
+#' @return The serialized object as a raw vector.
+#' @export
+#' @name qs_serialize
+#' 
+#' @examples
+#' x <- data.frame(int = sample(1e3, replace=TRUE),
+#'         num = rnorm(1e3),
+#'         char = sample(state.name, 1e3, replace=TRUE),
+#'         stringsAsFactors = FALSE)
+#' xserialized <- qs_serialize(x)
+#' x2 <- qs_deserialize(xserialized)
 #' identical(x, x2) # returns true
 NULL
 
@@ -63,15 +80,31 @@ NULL
 #' x <- data.frame(int = sample(1e3, replace=TRUE),
 #'         num = rnorm(1e3),
 #'         char = sample(state.name, 1e3, replace=TRUE),
-#'          stringsAsFactors = FALSE)
+#'         stringsAsFactors = FALSE)
 #' myfile <- tempfile()
 #' qs_save(x, myfile)
 #' x2 <- qs_read(myfile)
 #' identical(x, x2) # returns true
-#'
-#' # qs2 support multithreading
-#' qs_save(x, myfile, nthreads=1)
-#' x2 <- qs_read(myfile, nthreads=1)
+NULL
+
+#' qs_deserialize
+#' 
+#' Deserializes a raw vector to an object using the `qs2` format.
+#' 
+#' @usage qs_deserialize(input, validate_checksum = FALSE, nthreads = 1L)
+#' 
+#' @eval shared_params_read(file_input=FALSE)
+#' @return The deserialized object.
+#' @export
+#' @name qs_deserialize
+#' 
+#' @examples
+#' x <- data.frame(int = sample(1e3, replace=TRUE),
+#'         num = rnorm(1e3),
+#'         char = sample(state.name, 1e3, replace=TRUE),
+#'         stringsAsFactors = FALSE)
+#' xserialized <- qs_serialize(x)
+#' x2 <- qs_deserialize(xserialized)
 #' identical(x, x2) # returns true
 NULL
 
@@ -84,6 +117,7 @@ NULL
 #' nthreads = 1L)
 #'
 #' @eval shared_params_save(warn_unsupported_types = TRUE)
+#' @return No value is returned. The file is written to disk.
 #' @export
 #' @name qd_save
 #'
@@ -91,15 +125,32 @@ NULL
 #' x <- data.frame(int = sample(1e3, replace=TRUE),
 #'         num = rnorm(1e3),
 #'         char = sample(state.name, 1e3, replace=TRUE),
-#'          stringsAsFactors = FALSE)
+#'         stringsAsFactors = FALSE)
 #' myfile <- tempfile()
 #' qd_save(x, myfile)
 #' x2 <- qd_read(myfile)
 #' identical(x, x2) # returns true
-#'
-#' # qdata support multithreading
-#' qd_save(x, myfile, nthreads=1)
-#' x2 <- qd_read(myfile, nthreads=1)
+NULL
+
+#' qd_serialize
+#' 
+#' Serializes an object to a raw vector using the `qdata` format.
+#' 
+#' @usage qd_serialize(object, compress_level = 3L, shuffle = TRUE, 
+#' warn_unsupported_types = TRUE, nthreads = 1L)
+#' 
+#' @eval shared_params_save(file_output=FALSE, warn_unsupported_types = TRUE)
+#' @return The serialized object as a raw vector.
+#' @export
+#' @name qd_serialize
+#' 
+#' @examples
+#' x <- data.frame(int = sample(1e3, replace=TRUE),
+#'         num = rnorm(1e3),
+#'         char = sample(state.name, 1e3, replace=TRUE),
+#'         stringsAsFactors = FALSE)
+#' xserialized <- qd_serialize(x)
+#' x2 <- qd_deserialize(xserialized)
 #' identical(x, x2) # returns true
 NULL
 
@@ -118,15 +169,31 @@ NULL
 #' x <- data.frame(int = sample(1e3, replace=TRUE),
 #'         num = rnorm(1e3),
 #'         char = sample(state.name, 1e3, replace=TRUE),
-#'          stringsAsFactors = FALSE)
+#'         stringsAsFactors = FALSE)
 #' myfile <- tempfile()
 #' qd_save(x, myfile)
 #' x2 <- qd_read(myfile)
 #' identical(x, x2) # returns true
-#'
-#' # qdata support multithreading
-#' qd_save(x, myfile, nthreads=1)
-#' x2 <- qd_read(myfile, nthreads=1)
+NULL
+
+#' qd_deserialize
+#' 
+#' Deserializes a raw vector to an object using the `qdata` format.
+#' 
+#' @usage qd_deserialize(input, use_alt_rep = FALSE, validate_checksum = FALSE, nthreads = 1L)
+#' 
+#' @eval shared_params_read(file_input=FALSE, use_alt_rep = TRUE)
+#' @return The deserialized object.
+#' @export
+#' @name qd_deserialize
+#' 
+#' @examples
+#' x <- data.frame(int = sample(1e3, replace=TRUE),
+#'         num = rnorm(1e3),
+#'         char = sample(state.name, 1e3, replace=TRUE),
+#'         stringsAsFactors = FALSE)
+#' xserialized <- qd_serialize(x)
+#' x2 <- qd_deserialize(xserialized)
 #' identical(x, x2) # returns true
 NULL
 
@@ -246,5 +313,21 @@ NULL
 #' x <- serialize(1L:1000L, NULL)
 #' xshuf <- blosc_shuffle_raw(x, 4)
 #' xunshuf <- blosc_unshuffle_raw(xshuf, 4)
+NULL
+
+#' XXH3_64 hash
+#' 
+#' Calculates 64-bit XXH3 hash
+#' 
+#' @usage xxhash_raw(data)
+#' @param data The data to hash
+#' 
+#' @return The 64-bit hash
+#' @export
+#' @name xxhash_raw
+#' 
+#' @examples
+#' x <- as.raw(c(1,2,3))
+#' xxhash_raw(x)
 NULL
 

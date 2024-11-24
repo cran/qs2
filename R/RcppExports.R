@@ -5,16 +5,32 @@ qs_save <- function(object, file, compress_level = 3L, shuffle = TRUE, nthreads 
     invisible(.Call(`_qs2_qs_save`, object, file, compress_level, shuffle, nthreads))
 }
 
+qs_serialize <- function(object, compress_level = 3L, shuffle = TRUE, nthreads = 1L) {
+    invisible(.Call(`_qs2_qs_serialize`, object, compress_level, shuffle, nthreads))
+}
+
 qs_read <- function(file, validate_checksum = FALSE, nthreads = 1L) {
     .Call(`_qs2_qs_read`, file, validate_checksum, nthreads)
+}
+
+qs_deserialize <- function(input, validate_checksum = FALSE, nthreads = 1L) {
+    .Call(`_qs2_qs_deserialize`, input, validate_checksum, nthreads)
 }
 
 qd_save <- function(object, file, compress_level = 3L, shuffle = TRUE, warn_unsupported_types = TRUE, nthreads = 1L) {
     invisible(.Call(`_qs2_qd_save`, object, file, compress_level, shuffle, warn_unsupported_types, nthreads))
 }
 
+qd_serialize <- function(object, compress_level = 3L, shuffle = TRUE, warn_unsupported_types = TRUE, nthreads = 1L) {
+    .Call(`_qs2_qd_serialize`, object, compress_level, shuffle, warn_unsupported_types, nthreads)
+}
+
 qd_read <- function(file, use_alt_rep = FALSE, validate_checksum = FALSE, nthreads = 1L) {
     .Call(`_qs2_qd_read`, file, use_alt_rep, validate_checksum, nthreads)
+}
+
+qd_deserialize <- function(input, use_alt_rep = FALSE, validate_checksum = FALSE, nthreads = 1L) {
+    .Call(`_qs2_qd_deserialize`, input, use_alt_rep, validate_checksum, nthreads)
 }
 
 qx_dump <- function(file) {
@@ -31,6 +47,14 @@ check_TBB <- function() {
 
 check_internal_blocksize <- function() {
     .Call(`_qs2_check_internal_blocksize`)
+}
+
+internal_set_blocksize <- function(size) {
+    .Call(`_qs2_internal_set_blocksize`, size)
+}
+
+internal_is_utf8_locale <- function(size) {
+    .Call(`_qs2_internal_is_utf8_locale`, size)
 }
 
 zstd_compress_raw <- function(data, compress_level) {
@@ -53,11 +77,23 @@ blosc_unshuffle_raw <- function(data, bytesofsize) {
     .Call(`_qs2_blosc_unshuffle_raw`, data, bytesofsize)
 }
 
-internal_set_blocksize <- function(size) {
-    .Call(`_qs2_internal_set_blocksize`, size)
+xxhash_raw <- function(data) {
+    .Call(`_qs2_xxhash_raw`, data)
 }
 
-internal_is_utf8_locale <- function(size) {
-    .Call(`_qs2_internal_is_utf8_locale`, size)
+base85_encode <- function(rawdata) {
+    .Call(`_qs2_base85_encode`, rawdata)
+}
+
+base85_decode <- function(encoded_string) {
+    .Call(`_qs2_base85_decode`, encoded_string)
+}
+
+c_base91_encode <- function(rawdata) {
+    .Call(`_qs2_c_base91_encode`, rawdata)
+}
+
+c_base91_decode <- function(encoded_string) {
+    .Call(`_qs2_c_base91_decode`, encoded_string)
 }
 

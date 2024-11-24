@@ -3,8 +3,8 @@ IS_GITHUB <- Sys.getenv("IS_GITHUB") != ""
 
 ## ----results='asis', echo=FALSE, eval=IS_GITHUB-------------------------------
 #  cat('
-#  [![R-CMD-check](https://github.com/traversc/qs2/workflows/R-CMD-check/badge.svg)](https://github.com/traversc/qs2/actions)
-#  [![CRAN-Status-Badge](http://www.r-pkg.org/badges/version/qs2)](https://cran.r-project.org/package=qs2)
+#  [![R-CMD-check](https://github.com/qsbase/qs2/workflows/R-CMD-check/badge.svg)](https://github.com/qsbase/qs2/actions)
+#  [![CRAN-Status-Badge](https://www.r-pkg.org/badges/version/qs2)](https://cran.r-project.org/package=qs2)
 #  [![CRAN-Downloads-Badge](https://cranlogs.r-pkg.org/badges/qs2)](https://cran.r-project.org/package=qs2)
 #  [![CRAN-Downloads-Total-Badge](https://cranlogs.r-pkg.org/badges/grand-total/qs2)](https://cran.r-project.org/package=qs2)
 #  ')
@@ -17,7 +17,10 @@ IS_GITHUB <- Sys.getenv("IS_GITHUB") != ""
 #  install.packages("qs2")
 
 ## ----eval=FALSE---------------------------------------------------------------
-#  remotes::install_cran("qs2", type = "source", configure.args = " --with-TBB --with-simd=AVX2")
+#  remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB --with-simd=AVX2")
+
+## ----eval=FALSE---------------------------------------------------------------
+#  remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB")
 
 ## ----eval=FALSE---------------------------------------------------------------
 #  file_qs2 <- tempfile(fileext = ".qs2")

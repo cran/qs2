@@ -7,10 +7,9 @@
   
 using namespace Rcpp;
 
-#define FILE_SAVE_ERR_MSG "Failed to open for writing. Does the directory exist? Do you have file permissions? Is the file name long? (>255 chars)"
-
 struct qsSaveImplArgs {
     SEXP object;
+    uint64_t & output_hash;
     R_outpstream_t out;
 };
 
@@ -43,11 +42,7 @@ SEXP qs_save_impl(void * _args) {
     qsSaveImplArgs * args = reinterpret_cast<qsSaveImplArgs*>(_args);
     R_Serialize(args->object, args->out);
     block_compress_writer* writer = reinterpret_cast<block_compress_writer*>(args->out->data);
-    uint64_t hash = writer->finish();
-
-    // it would be more consistent with the layered module approach to write outside of this implementation
-    // but its easier to do here, as we don't have to smuggle the hash out, since we are forced to return a SEXP
-    write_qx_hash(writer->myFile, hash);
+    args->output_hash = writer->finish();
     return R_NilValue;
 }
 
