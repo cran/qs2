@@ -106,6 +106,7 @@ inline void write_qx_hash(stream_writer & writer, const uint64_t value) {
     }
 }
 
+
 template <typename stream_reader>
 inline void read_qdata_header(stream_reader & reader, bool & shuffle, uint64_t & hash) {
     std::array<uint8_t, 24> bits = {};

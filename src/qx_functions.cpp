@@ -87,7 +87,7 @@ void qx_export_functions(DllInfo* dll);
     R_SerializeInit(&out, block_io);                                                                                   \
     qsSaveImplArgs args = {object, hash, &out};                                                                        \
     DO_JMPBUF_QS_SAVE();                                                                                               \
-    DO_UNWIND_PROTECT(qs_save_impl, decltype(block_io), args);
+    DO_UNWIND_PROTECT_QS_SAVE(qs_save_impl, decltype(block_io), args);
 
 // [[Rcpp::export(rng = false, invisible = true)]]
 SEXP qs_save(SEXP object, const std::string& file, const int compress_level = 3, const bool shuffle = true, const int nthreads = 1) {
@@ -107,7 +107,6 @@ SEXP qs_save(SEXP object, const std::string& file, const int compress_level = 3,
 
     UNWIND_PROTECT_BEGIN()
     struct R_outpstream_st out;
-    SEXP output = R_NilValue;
     uint64_t hash = 0;
     if (nthreads > 1) {
 #if RCPP_PARALLEL_USE_TBB
@@ -126,7 +125,7 @@ SEXP qs_save(SEXP object, const std::string& file, const int compress_level = 3,
         }
     }
     write_qx_hash(myFile, hash);
-    return output;
+    return R_NilValue;
     UNWIND_PROTECT_END();
     return R_NilValue;
 }
@@ -145,7 +144,6 @@ CVectorOut qs_serialize_impl(SEXP object, const int compress_level = 3, const bo
 
     UNWIND_PROTECT_BEGIN()
     struct R_outpstream_st out;
-    SEXP output = R_NilValue;
     uint64_t hash = 0;
     if (nthreads > 1) {
 #if RCPP_PARALLEL_USE_TBB
@@ -166,7 +164,6 @@ CVectorOut qs_serialize_impl(SEXP object, const int compress_level = 3, const bo
     uint64_t len = myFile.tellp();
     write_qx_hash(myFile, hash);  // must be done after getting length (position) from tellp
     myFile.seekp(len);
-    (void)output;  // unused variable
     return myFile;
     UNWIND_PROTECT_END();
     return CVectorOut{};
@@ -194,11 +191,13 @@ bool c_qs_free(void *buffer) {
 }
 
 // DO_UNWIND_PROTECT macro assigns SEXP output
+// return output within macro (within inner if-else) to avoid false positive RCHK warning
 #define DO_QS_READ(_STREAM_READER_, _BASE_CLASS_, _DECOMPRESSOR_)                                                             \
     _BASE_CLASS_<_STREAM_READER_, _DECOMPRESSOR_, ErrorType::r_error> block_io(myFile);                                       \
     R_UnserializeInit<_BASE_CLASS_<_STREAM_READER_, _DECOMPRESSOR_, ErrorType::r_error>>(&in, (R_pstream_data_t)(&block_io)); \
     DO_JMPBUF_QS_READ();                                                                                                      \
-    DO_UNWIND_PROTECT(qs_read_impl, decltype(block_io), in);
+    DO_UNWIND_PROTECT_QS_READ(qs_read_impl, decltype(block_io), in); \
+    return output;
 
 // [[Rcpp::export(rng = false)]]
 SEXP qs_read(const std::string& file, const bool validate_checksum = false, const int nthreads = 1) {
@@ -229,7 +228,7 @@ SEXP qs_read(const std::string& file, const bool validate_checksum = false, cons
     struct R_inpstream_st in;
     SEXP output = R_NilValue;
     if (nthreads > 1) {
-#if RCPP_PARALLEL_USE_TBB
+#if RCPP_PARALLEL_USE_TBB != 0
         tbb::global_control gc(tbb::global_control::parameter::max_allowed_parallelism, nthreads);
         if (shuffle) {
             DO_QS_READ(IfStreamReader, BlockCompressReaderMT, ZstdShuffleDecompressor);
@@ -244,7 +243,6 @@ SEXP qs_read(const std::string& file, const bool validate_checksum = false, cons
             DO_QS_READ(IfStreamReader, BlockCompressReader, ZstdDecompressor);
         }
     }
-    return output;
     UNWIND_PROTECT_END();
     return R_NilValue;
 }
@@ -272,7 +270,7 @@ SEXP qs_deserialize_impl(CVectorIn& myFile, const bool validate_checksum = false
     struct R_inpstream_st in;
     SEXP output = R_NilValue;
     if (nthreads > 1) {
-#if RCPP_PARALLEL_USE_TBB
+#if RCPP_PARALLEL_USE_TBB != 0
         tbb::global_control gc(tbb::global_control::parameter::max_allowed_parallelism, nthreads);
         if (shuffle) {
             DO_QS_READ(CVectorIn, BlockCompressReaderMT, ZstdShuffleDecompressor);
@@ -287,7 +285,6 @@ SEXP qs_deserialize_impl(CVectorIn& myFile, const bool validate_checksum = false
             DO_QS_READ(CVectorIn, BlockCompressReader, ZstdDecompressor);
         }
     }
-    return output;
     UNWIND_PROTECT_END();
     return R_NilValue;
 }
@@ -407,13 +404,15 @@ bool c_qd_free(void *buffer) {
     return true;
 }
 
+// return output within macro (within inner if-else) to avoid false positive RCHK warning
 #define DO_QD_READ(_STREAM_READER_, _BASE_CLASS_, _DECOMPRESSOR_)                                                             \
     _BASE_CLASS_<_STREAM_READER_, _DECOMPRESSOR_, ErrorType::cpp_error> reader(myFile);                                       \
     QdataDeserializer<_BASE_CLASS_<_STREAM_READER_, _DECOMPRESSOR_, ErrorType::cpp_error>> deserializer(reader, use_alt_rep); \
     output = PROTECT(deserializer.read_object());                                                                             \
     deserializer.read_object_data();                                                                                          \
     reader.finish();                                                                                                          \
-    UNPROTECT(1);
+    UNPROTECT(1);                                                                                                             \
+    return output;
 
 // [[Rcpp::export(rng = false)]]
 SEXP qd_read(const std::string& file, const bool use_alt_rep = false, const bool validate_checksum = false, const int nthreads = 1) {
@@ -441,7 +440,7 @@ SEXP qd_read(const std::string& file, const bool use_alt_rep = false, const bool
 
     SEXP output = R_NilValue;
     if (nthreads > 1) {
-#if RCPP_PARALLEL_USE_TBB
+#if RCPP_PARALLEL_USE_TBB != 0
         tbb::global_control gc(tbb::global_control::parameter::max_allowed_parallelism, nthreads);
         if (shuffle) {
             DO_QD_READ(IfStreamReader, BlockCompressReaderMT, ZstdShuffleDecompressor);
@@ -456,7 +455,7 @@ SEXP qd_read(const std::string& file, const bool use_alt_rep = false, const bool
             DO_QD_READ(IfStreamReader, BlockCompressReader, ZstdDecompressor);
         }
     }
-    return output;
+    return R_NilValue; // unreachable
 }
 
 SEXP qd_deserialize_impl(CVectorIn& myFile, const bool use_alt_rep = false, const bool validate_checksum = false, const int nthreads = 1) {
@@ -480,7 +479,7 @@ SEXP qd_deserialize_impl(CVectorIn& myFile, const bool use_alt_rep = false, cons
 
     SEXP output = R_NilValue;
     if (nthreads > 1) {
-#if RCPP_PARALLEL_USE_TBB
+#if RCPP_PARALLEL_USE_TBB != 0
         tbb::global_control gc(tbb::global_control::parameter::max_allowed_parallelism, nthreads);
         if (shuffle) {
             DO_QD_READ(CVectorIn, BlockCompressReaderMT, ZstdShuffleDecompressor);
@@ -495,7 +494,7 @@ SEXP qd_deserialize_impl(CVectorIn& myFile, const bool use_alt_rep = false, cons
             DO_QD_READ(CVectorIn, BlockCompressReader, ZstdDecompressor);
         }
     }
-    return output;
+    return R_NilValue; // unreachable
 }
 
 // [[Rcpp::export(rng = false)]]

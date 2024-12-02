@@ -1,5 +1,5 @@
-56dfb40a1ce25ea0f63d5d1892536ff3 *ChangeLog
-8b18f292b82832dce4cfef0405e785f5 *DESCRIPTION
+8567c9651a207fcbbd4b14ee25ad4e62 *ChangeLog
+f226688e9accfb50cd8e80a82939a194 *DESCRIPTION
 45ed3b7c805a8f3f9b6fb7718202fb2e *NAMESPACE
 776e9c678f92dd15e34cfedf75d2b44c *R/RcppExports.R
 967e2191d3843c962815ed59bec26472 *R/ascii_encoding.R
@@ -72,10 +72,10 @@ e78b071bc2fd4dc28a150fdbd33db3a8 *src/qd_deserializer.h
 04c7ab5d870bc6112008e69b31988f80 *src/qd_serializer.h
 926ea9eded1418637321d5843618a8a8 *src/qs_deserializer.h
 b398fb0935f270f60e6edff09bf9d08e *src/qs_serializer.h
-bb94447951079f07788b02325ed38909 *src/qs_unwind_protect.h
+a0fe1e909afa0c0caef416e4b701771a *src/qs_unwind_protect.h
 91a3a955a75f5173ade92f4195bcc0bf *src/qx_dump.h
-d5ed863a4a245b07667ea8c05e1b4bea *src/qx_file_headers.h
-49ff25a8620e144af6a4642396684a08 *src/qx_functions.cpp
+aa76574872eeb63867bceab886069eaf *src/qx_file_headers.h
+3527484053144ec73cf36c1fba699c75 *src/qx_functions.cpp
 9d5994a622234102b6c26e059c20d32d *src/xxhash/xxhash.c
 322119a72933bdb526d797d24ecb6a0e *src/xxhash/xxhash.h
 6bc55d83697490bdf4adb037edc05a2a *tests/correctness_testing.R
