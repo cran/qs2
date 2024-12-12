@@ -1,8 +1,8 @@
 Package: qs2
 Type: Package
 Title: Efficient Serialization of R Objects
-Version: 0.1.3
-Date: 2024-11-29
+Version: 0.1.4
+Date: 2024-12-11
 Authors@R: c(
     person("Travers", "Ching", email = "traversc@gmail.com", role = c("aut", "cre", "cph")),
     person("Yann", "Collet", role = c("ctb", "cph"), comment = "Yann Collet is the author of the bundled zstd"),
@@ -30,7 +30,7 @@ Copyright: This package includes code from the 'zstd' library owned by
 URL: https://github.com/qsbase/qs2
 BugReports: https://github.com/qsbase/qs2/issues
 NeedsCompilation: yes
-Packaged: 2024-11-30 05:14:37 UTC; tching
+Packaged: 2024-12-12 01:03:21 UTC; tching
 Author: Travers Ching [aut, cre, cph],
   Yann Collet [ctb, cph] (Yann Collet is the author of the bundled zstd),
   Facebook, Inc. [cph] (Facebook is the copyright holder of the bundled
@@ -44,4 +44,4 @@ Author: Travers Ching [aut, cre, cph],
   Francesc Alted [ctb, cph] (Shuffling routines derived from Blosc
     library)
 Repository: CRAN
-Date/Publication: 2024-12-02 10:10:02 UTC
+Date/Publication: 2024-12-12 06:00:02 UTC
