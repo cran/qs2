@@ -1,4 +1,8 @@
 ## ----setup, echo=FALSE--------------------------------------------------------
+knitr::knit_engines$set(cpp = function(options) {
+  options$engine <- "Rcpp"
+  knitr::engine_output(options, options$code, out = "")
+})
 IS_GITHUB <- Sys.getenv("IS_GITHUB") != ""
 
 ## ----results='asis', echo=FALSE, eval=IS_GITHUB-------------------------------
