@@ -119,7 +119,7 @@ BEGIN_RCPP
 END_RCPP
 }
 // qs_save
-SEXP qs_save(SEXP object, const std::string& file, const int compress_level, const bool shuffle, const int nthreads);
+SEXP qs_save(SEXP object, const std::string& file, const int compress_level, const bool shuffle, int nthreads);
 RcppExport SEXP _qs2_qs_save(SEXP objectSEXP, SEXP fileSEXP, SEXP compress_levelSEXP, SEXP shuffleSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -127,50 +127,50 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
     Rcpp::traits::input_parameter< const int >::type compress_level(compress_levelSEXP);
     Rcpp::traits::input_parameter< const bool >::type shuffle(shuffleSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qs_save(object, file, compress_level, shuffle, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qs_serialize
-SEXP qs_serialize(SEXP object, const int compress_level, const bool shuffle, const int nthreads);
+SEXP qs_serialize(SEXP object, const int compress_level, const bool shuffle, int nthreads);
 RcppExport SEXP _qs2_qs_serialize(SEXP objectSEXP, SEXP compress_levelSEXP, SEXP shuffleSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type object(objectSEXP);
     Rcpp::traits::input_parameter< const int >::type compress_level(compress_levelSEXP);
     Rcpp::traits::input_parameter< const bool >::type shuffle(shuffleSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qs_serialize(object, compress_level, shuffle, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qs_read
-SEXP qs_read(const std::string& file, const bool validate_checksum, const int nthreads);
+SEXP qs_read(const std::string& file, const bool validate_checksum, int nthreads);
 RcppExport SEXP _qs2_qs_read(SEXP fileSEXP, SEXP validate_checksumSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate_checksum(validate_checksumSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qs_read(file, validate_checksum, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qs_deserialize
-SEXP qs_deserialize(SEXP input, const bool validate_checksum, const int nthreads);
+SEXP qs_deserialize(SEXP input, const bool validate_checksum, int nthreads);
 RcppExport SEXP _qs2_qs_deserialize(SEXP inputSEXP, SEXP validate_checksumSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type input(inputSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate_checksum(validate_checksumSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qs_deserialize(input, validate_checksum, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qd_save
-SEXP qd_save(SEXP object, const std::string& file, const int compress_level, const bool shuffle, const bool warn_unsupported_types, const int nthreads);
+SEXP qd_save(SEXP object, const std::string& file, const int compress_level, const bool shuffle, const bool warn_unsupported_types, int nthreads);
 RcppExport SEXP _qs2_qd_save(SEXP objectSEXP, SEXP fileSEXP, SEXP compress_levelSEXP, SEXP shuffleSEXP, SEXP warn_unsupported_typesSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -179,13 +179,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type compress_level(compress_levelSEXP);
     Rcpp::traits::input_parameter< const bool >::type shuffle(shuffleSEXP);
     Rcpp::traits::input_parameter< const bool >::type warn_unsupported_types(warn_unsupported_typesSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qd_save(object, file, compress_level, shuffle, warn_unsupported_types, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qd_serialize
-SEXP qd_serialize(SEXP object, const int compress_level, const bool shuffle, const bool warn_unsupported_types, const int nthreads);
+SEXP qd_serialize(SEXP object, const int compress_level, const bool shuffle, const bool warn_unsupported_types, int nthreads);
 RcppExport SEXP _qs2_qd_serialize(SEXP objectSEXP, SEXP compress_levelSEXP, SEXP shuffleSEXP, SEXP warn_unsupported_typesSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
@@ -193,33 +193,33 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const int >::type compress_level(compress_levelSEXP);
     Rcpp::traits::input_parameter< const bool >::type shuffle(shuffleSEXP);
     Rcpp::traits::input_parameter< const bool >::type warn_unsupported_types(warn_unsupported_typesSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qd_serialize(object, compress_level, shuffle, warn_unsupported_types, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qd_read
-SEXP qd_read(const std::string& file, const bool use_alt_rep, const bool validate_checksum, const int nthreads);
+SEXP qd_read(const std::string& file, const bool use_alt_rep, const bool validate_checksum, int nthreads);
 RcppExport SEXP _qs2_qd_read(SEXP fileSEXP, SEXP use_alt_repSEXP, SEXP validate_checksumSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< const std::string& >::type file(fileSEXP);
     Rcpp::traits::input_parameter< const bool >::type use_alt_rep(use_alt_repSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate_checksum(validate_checksumSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qd_read(file, use_alt_rep, validate_checksum, nthreads));
     return rcpp_result_gen;
 END_RCPP
 }
 // qd_deserialize
-SEXP qd_deserialize(SEXP input, const bool use_alt_rep, const bool validate_checksum, const int nthreads);
+SEXP qd_deserialize(SEXP input, const bool use_alt_rep, const bool validate_checksum, int nthreads);
 RcppExport SEXP _qs2_qd_deserialize(SEXP inputSEXP, SEXP use_alt_repSEXP, SEXP validate_checksumSEXP, SEXP nthreadsSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::traits::input_parameter< SEXP >::type input(inputSEXP);
     Rcpp::traits::input_parameter< const bool >::type use_alt_rep(use_alt_repSEXP);
     Rcpp::traits::input_parameter< const bool >::type validate_checksum(validate_checksumSEXP);
-    Rcpp::traits::input_parameter< const int >::type nthreads(nthreadsSEXP);
+    Rcpp::traits::input_parameter< int >::type nthreads(nthreadsSEXP);
     rcpp_result_gen = Rcpp::wrap(qd_deserialize(input, use_alt_rep, validate_checksum, nthreads));
     return rcpp_result_gen;
 END_RCPP
@@ -384,6 +384,29 @@ BEGIN_RCPP
     return rcpp_result_gen;
 END_RCPP
 }
+// zstd_compress_file
+SEXP zstd_compress_file(const std::string& input_file, const std::string& output_file, const int compress_level);
+RcppExport SEXP _qs2_zstd_compress_file(SEXP input_fileSEXP, SEXP output_fileSEXP, SEXP compress_levelSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type input_file(input_fileSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type output_file(output_fileSEXP);
+    Rcpp::traits::input_parameter< const int >::type compress_level(compress_levelSEXP);
+    rcpp_result_gen = Rcpp::wrap(zstd_compress_file(input_file, output_file, compress_level));
+    return rcpp_result_gen;
+END_RCPP
+}
+// zstd_decompress_file
+SEXP zstd_decompress_file(const std::string& input_file, const std::string& output_file);
+RcppExport SEXP _qs2_zstd_decompress_file(SEXP input_fileSEXP, SEXP output_fileSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::traits::input_parameter< const std::string& >::type input_file(input_fileSEXP);
+    Rcpp::traits::input_parameter< const std::string& >::type output_file(output_fileSEXP);
+    rcpp_result_gen = Rcpp::wrap(zstd_decompress_file(input_file, output_file));
+    return rcpp_result_gen;
+END_RCPP
+}
 
 static const R_CallMethodDef CallEntries[] = {
     {"_qs2_qs2_get_compress_level", (DL_FUNC) &_qs2_qs2_get_compress_level, 0},
@@ -422,6 +445,8 @@ static const R_CallMethodDef CallEntries[] = {
     {"_qs2_base85_decode", (DL_FUNC) &_qs2_base85_decode, 1},
     {"_qs2_c_base91_encode", (DL_FUNC) &_qs2_c_base91_encode, 1},
     {"_qs2_c_base91_decode", (DL_FUNC) &_qs2_c_base91_decode, 1},
+    {"_qs2_zstd_compress_file", (DL_FUNC) &_qs2_zstd_compress_file, 3},
+    {"_qs2_zstd_decompress_file", (DL_FUNC) &_qs2_zstd_decompress_file, 2},
     {NULL, NULL, 0}
 };
 
