@@ -48,16 +48,10 @@ Use the file extension `qs2` to distinguish it from the original `qs` package. I
 install.packages("qs2")
 ```
 
-On x64 Mac or Linux, you can enable multi-threading by compiling from source. It is enabled by default on Windows. 
+On x64 Mac or Linux (x86 only), you can gain a little more performance with the following configure flag:
 
 ```{r eval=FALSE}
-remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB --with-simd=AVX2")
-```
-
-On non-x64 systems (e.g. Mac ARM) remove the AVX2 flag.
-
-```{r eval=FALSE}
-remotes::install_cran("qs2", type = "source", configure.args = "--with-TBB")
+remotes::install_cran("qs2", type = "source", configure.args = "--with-simd=AVX2")
 ```
 
 Multi-threading in `qs2` uses the `Intel Thread Building Blocks` framework via the `RcppParallel` package.
@@ -90,6 +84,54 @@ The `qs2` format saves an internal checksum. This can be used to test for file c
 ```{r eval=FALSE}
 qs_save(data, "myfile.qs2")
 data <- qs_read("myfile.qs2", validate_checksum = TRUE)
+```
+
+# Bindings to ZSTD compression library
+
+The package exposes the ZSTD compression library for both in memory data and
+file workflows.
+
+## In memory compression and decompression
+
+Use these functions when you already have raw vectors in memory and want
+direct control of compression.
+
+```{r eval=FALSE}
+x <- serialize(mtcars, connection = NULL)
+xz <- zstd_compress_raw(x, compress_level = 3)
+x2 <- zstd_decompress_raw(xz)
+stopifnot(identical(x, x2))
+```
+
+## File compression
+
+These functions mirror typical file compression tools and keep the workflow
+simple when you want explicit input and output files.
+
+```{r eval=FALSE}
+infile <- tempfile()
+writeBin(as.raw(1:5), infile)
+zfile <- tempfile(fileext = ".zst")
+zstd_compress_file(infile, zfile, compress_level = 1)
+outfile <- tempfile()
+zstd_decompress_file(zfile, outfile)
+stopifnot(identical(readBin(infile, "raw", 5), readBin(outfile, "raw", 5)))
+```
+
+## zstd_in and zstd_out
+
+These generic wrappers substitute a zstd compressed file for a normal file
+path, so you can add zstd compression support to existing functions for reading and writing data.
+
+```{r eval=FALSE}
+# library(data.table)
+save_file <- tempfile(fileext = ".csv.zst")
+
+# write out zstd compressed table
+zstd_out(data.table::fwrite, mtcars, file = save_file)
+
+# read in zstd compressed table
+dt <- zstd_in(data.table::fread, file = save_file)
 ```
 
 # The qdata format
