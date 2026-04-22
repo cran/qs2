@@ -1,7 +1,14 @@
-#ifndef _QS2_QD_CONSTANTS_H_
-#define _QS2_QD_CONSTANTS_H_
+#ifndef QDATA_FORMAT_DETAIL_CONSTANTS_H
+#define QDATA_FORMAT_DETAIL_CONSTANTS_H
 
 #include <cstdint>
+
+#ifndef QDATA_U8_LITERAL_DEFINED
+#define QDATA_U8_LITERAL_DEFINED
+inline constexpr unsigned char operator ""_u8(unsigned long long arg) noexcept {
+    return static_cast<uint8_t>(arg);
+}
+#endif
 
 static constexpr uint32_t NA_STRING_LENGTH = 4294967295UL; // 2^32-1 -- length used to signify NA value; note maximum string size is defined by `int` in mkCharLen, so this value is safe
 static constexpr uint64_t MAX_SAFE_INTEGER = 9007199254740991ULL; // 2^53-1 -- the largest integer that can be "safely" represented as a double ~ (about 9000 terabytes)
@@ -83,5 +90,3 @@ enum class qstype : uint8_t {
 };
 
 #endif
-
-

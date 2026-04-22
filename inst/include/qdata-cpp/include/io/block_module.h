@@ -1,10 +1,11 @@
 #ifndef _QS2_BLOCK_MODULE_H
 #define _QS2_BLOCK_MODULE_H
 
-#include "io/io_common.h"
+#include "io_common.h"
+#include "xxhash_module.h"
 
 // direct_mem switch does nothing, but is kept for parity with MT code
-template <class stream_writer, class compressor, class hasher, ErrorType E, bool direct_mem>
+template <class stream_writer, class compressor, class hasher, class error_policy, bool direct_mem>
 struct BlockCompressWriter {
     stream_writer & myFile;
     compressor cp;
@@ -49,7 +50,7 @@ struct BlockCompressWriter {
         // nothing
     }
     void cleanup_and_throw(const std::string msg) {
-        throw_error<E>(msg.c_str());
+        throw_error<error_policy>(msg.c_str());
     }
     void push_data(const char * const inbuffer, const uint64_t len) {
         uint64_t current_pointer_consumed = 0;
@@ -105,10 +106,11 @@ struct BlockCompressWriter {
     }
 };
 
-template <class stream_reader, class decompressor, ErrorType E> 
+template <class stream_reader, class decompressor, class error_policy>
 struct BlockCompressReader {
     stream_reader & myFile;
     decompressor dp;
+    xxHashEnv hp;
     std::unique_ptr<char[]> block;
     std::unique_ptr<char[]> zblock;
     uint32_t current_blocksize;
@@ -116,6 +118,7 @@ struct BlockCompressReader {
     BlockCompressReader(stream_reader & f) : 
         myFile(f),
         dp(),
+        hp(),
         block(MAKE_UNIQUE_BLOCK(MAX_BLOCKSIZE)),
         zblock(MAKE_UNIQUE_BLOCK(MAX_ZBLOCKSIZE)),
         current_blocksize(0), 
@@ -127,10 +130,16 @@ struct BlockCompressReader {
         if(!ok) {
             cleanup_and_throw("Unexpected end of file while reading next block size");
         }
-        uint32_t bytes_read = myFile.read(zblock.get(), zsize & (~BLOCK_METADATA));
-        if(bytes_read != (zsize & (~BLOCK_METADATA))) {
+        const uint32_t zbytes = compressed_block_size(zsize);
+        if(!compressed_block_size_fits_buffer(zsize)) {
+            cleanup_and_throw("Compressed block size exceeds internal maximum");
+        }
+        hp.update(zsize);
+        uint32_t bytes_read = myFile.read(zblock.get(), zbytes);
+        if(bytes_read != zbytes) {
             cleanup_and_throw("Unexpected end of file while reading next block");
         }
+        hp.update(zblock.get(), bytes_read);
         current_blocksize = dp.decompress(block.get(), MAX_BLOCKSIZE, zblock.get(), zsize);
         if(decompressor::is_error(current_blocksize)) { cleanup_and_throw("Decompression error"); }
     }
@@ -140,10 +149,16 @@ struct BlockCompressReader {
         if(!ok) {
             cleanup_and_throw("Unexpected end of file while reading next block size");
         }
-        uint32_t bytes_read = myFile.read(zblock.get(), zsize & (~BLOCK_METADATA));
-        if(bytes_read != (zsize & (~BLOCK_METADATA))) {
+        const uint32_t zbytes = compressed_block_size(zsize);
+        if(!compressed_block_size_fits_buffer(zsize)) {
+            cleanup_and_throw("Compressed block size exceeds internal maximum");
+        }
+        hp.update(zsize);
+        uint32_t bytes_read = myFile.read(zblock.get(), zbytes);
+        if(bytes_read != zbytes) {
             cleanup_and_throw("Unexpected end of file while reading next block");
         }
+        hp.update(zblock.get(), bytes_read);
         current_blocksize = dp.decompress(outbuffer, MAX_BLOCKSIZE, zblock.get(), zsize);
         if(decompressor::is_error(current_blocksize)) { cleanup_and_throw("Decompression error"); }
     }
@@ -155,7 +170,30 @@ struct BlockCompressReader {
         // nothing
     }
     void cleanup_and_throw(const std::string msg) {
-        throw_error<E>(msg.c_str());
+        throw_error<error_policy>(msg.c_str());
+    }
+    uint64_t get_hash_digest() {
+        return hp.digest();
+    }
+    const char * current_data() {
+        if(current_blocksize == data_offset) {
+            decompress_block();
+            data_offset = 0;
+        }
+        return block.get() + data_offset;
+    }
+    uint32_t remaining_data() {
+        if(current_blocksize == data_offset) {
+            decompress_block();
+            data_offset = 0;
+        }
+        return current_blocksize - data_offset;
+    }
+    void advance_data(const uint32_t len) {
+        if(current_blocksize - data_offset < len) {
+            cleanup_and_throw("Corrupted block data");
+        }
+        data_offset += len;
     }
     void get_data(char * outbuffer, const uint64_t len) {
         if(current_blocksize - data_offset >= len) {
@@ -167,6 +205,9 @@ struct BlockCompressReader {
             std::memcpy(outbuffer, block.get()+data_offset, bytes_accounted);
             while(len - bytes_accounted >= MAX_BLOCKSIZE) {
                 decompress_direct(outbuffer + bytes_accounted);
+                if(current_blocksize != MAX_BLOCKSIZE) {
+                    cleanup_and_throw("Corrupted block data");
+                }
                 bytes_accounted += MAX_BLOCKSIZE;
                 data_offset = MAX_BLOCKSIZE;
             }

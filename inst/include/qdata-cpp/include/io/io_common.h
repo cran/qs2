@@ -1,37 +1,41 @@
 #ifndef _QS2_IO_COMMON_H
 #define _QS2_IO_COMMON_H
 
-#include <Rcpp.h> // only needed for Rf_error
 #include <fstream>
 #include <cstdint>
 #include <memory>
 #include <cstring>
 #include <algorithm>
 
+#include "error_policy.h"
+
 #include "zstd.h"
-#include "xxhash/xxhash.c"
+#define XXH_INLINE_ALL
+#include "../xxhash/xxhash.h"
+#undef XXH_INLINE_ALL
 
-#include "BLOSC/shuffle_routines.h"
-#include "BLOSC/unshuffle_routines.h"
+#include "../blosc/shuffle_routines.h"
+#include "../blosc/unshuffle_routines.h"
 
-#ifdef QS2_DYNAMIC_BLOCKSIZE
-static uint64_t MAX_BLOCKSIZE = 1048576ULL;
-static constexpr uint64_t BLOCK_RESERVE = 64ULL;
-static uint64_t MIN_BLOCKSIZE = MAX_BLOCKSIZE - BLOCK_RESERVE; // smallest allowable block size, except for last block
-static uint64_t MAX_ZBLOCKSIZE = ZSTD_compressBound(MAX_BLOCKSIZE);
-#else
 static constexpr uint32_t MAX_BLOCKSIZE = 1048576UL;
 static constexpr uint32_t BLOCK_RESERVE = 64UL;
 static constexpr uint32_t MIN_BLOCKSIZE = MAX_BLOCKSIZE - BLOCK_RESERVE; // smallest allowable block size, except for last block
-static const uint32_t MAX_ZBLOCKSIZE = ZSTD_compressBound(MAX_BLOCKSIZE);
+static constexpr uint32_t MAX_ZBLOCKSIZE = static_cast<uint32_t>(ZSTD_COMPRESSBOUND(MAX_BLOCKSIZE));
 // 2^20 ... we save blocksize as uint32_t, so the last 12 MSBs can be used to store metadata
 // This blocksize is 2x larger than `qs` and seems to be a better tradeoff overall in benchmarks
-#endif
 
 // 11111111 11110000 00000000 00000000 in binary, First 12 MSBs can be used for metadata in either zblock or block
 // currently only using the first bit for metadata
 static constexpr uint32_t BLOCK_METADATA = 0x80000000; // 10000000 00000000 00000000 00000000
 static constexpr uint32_t SHUFFLE_MASK = (1ULL << 31);
+
+inline constexpr uint32_t compressed_block_size(const uint32_t zsize) noexcept {
+    return zsize & (~BLOCK_METADATA);
+}
+
+inline constexpr bool compressed_block_size_fits_buffer(const uint32_t zsize) noexcept {
+    return static_cast<uint64_t>(compressed_block_size(zsize)) <= MAX_ZBLOCKSIZE;
+}
 
 // MAKE_UNIQUE_BLOCK and MAKE_SHARED_BLOCK macros should be used ONLY in initializer lists
 #if __cplusplus >= 201402L // Check for C++14 or above
@@ -60,33 +64,13 @@ static constexpr uint32_t SHUFFLE_MASK = (1ULL << 31);
     #define MAKE_SHARED_BLOCK_ASSIGNMENT(SIZE) std::shared_ptr<char[]>(new char[SIZE])
 #endif
 
-enum class ErrorType { r_error, cpp_error };
-
-// default including cpp_error
-template <ErrorType E>
-inline void throw_error(const char * const msg) {
-    throw std::runtime_error(msg);
-}
-
-template<>
-inline void throw_error<ErrorType::r_error>(const char * const msg) {
-    Rf_error("%s", msg);
-}
-
-template <ErrorType E>
-inline void throw_error(const std::string msg) {
-    throw std::runtime_error(msg.c_str());
-}
-
-template<>
-inline void throw_error<ErrorType::r_error>(const std::string msg) {
-    Rf_error("%s", msg.c_str());
-}
-
 // https://stackoverflow.com/a/36835959/2723734
+#ifndef QDATA_U8_LITERAL_DEFINED
+#define QDATA_U8_LITERAL_DEFINED
 inline constexpr unsigned char operator ""_u8(unsigned long long arg) noexcept {
     return static_cast<uint8_t>(arg);
 }
+#endif
 
 // #define QS_MT_SERIALIZATION_DEBUG
 #if defined(QS_MT_SERIALIZATION_DEBUG)

@@ -247,7 +247,7 @@ XgTree({18.5,7169.5,10181.5,7049,7199,1222,19884.5,6949.5,6941.5,-0.0053180954,1
 };
 
 
-double predict_xgboost_impl(const std::array<double, 9> & features) {
+inline double predict_xgboost_impl(const std::array<double, 9> & features) {
   double result = base_score;
   for (auto & tree : XgForest) {
     result += tree.predict(features);
@@ -259,4 +259,3 @@ double predict_xgboost_impl(const std::array<double, 9> & features) {
 
 
 #endif // include guard
-

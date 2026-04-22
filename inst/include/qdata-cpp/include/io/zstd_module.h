@@ -1,8 +1,8 @@
 #ifndef _QS2_ZSTD_MODULE_H
 #define _QS2_ZSTD_MODULE_H
 
-#include "io/io_common.h"
-#include "io/xgboost_blockshuffle_model.h"
+#include "io_common.h"
+#include "xgboost_blockshuffle_model.h"
 
 
 static constexpr uint32_t COMPRESSION_ERROR = 0;
@@ -108,7 +108,7 @@ struct ZstdShuffleCompressor {
                 if(ZSTD_isError(output_size_with_shuffle) || ZSTD_isError(output_size_no_shuffle)) {
                     return COMPRESSION_ERROR;
                 }
-                if(output_size_with_shuffle > output_size_no_shuffle) {
+                if(output_size_with_shuffle < output_size_no_shuffle) {
                     // replace output in dst
                     std::memcpy(dst, shuffle_zblock.get(), output_size_with_shuffle);
                     return output_size_with_shuffle | SHUFFLE_MASK;

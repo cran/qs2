@@ -68,6 +68,6 @@ IS_GITHUB <- Sys.getenv("IS_GITHUB") != ""
 # dt <- zstd_in(data.table::fread, file = save_file)
 
 ## ----eval=FALSE---------------------------------------------------------------
-# qd_save(data, "myfile.qs2")
-# data <- qd_read("myfile.qs2")
+# qd_save(data, "myfile.qdata")
+# data <- qd_read("myfile.qdata")
 
